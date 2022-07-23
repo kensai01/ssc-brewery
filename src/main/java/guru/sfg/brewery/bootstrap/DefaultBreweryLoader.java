@@ -17,7 +17,11 @@
 package guru.sfg.brewery.bootstrap;
 
 import guru.sfg.brewery.domain.*;
+import guru.sfg.brewery.domain.security.Authority;
+import guru.sfg.brewery.domain.security.User;
 import guru.sfg.brewery.repositories.*;
+import guru.sfg.brewery.repositories.security.AuthorityRepository;
+import guru.sfg.brewery.repositories.security.UserRepository;
 import guru.sfg.brewery.web.model.BeerStyleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -45,10 +49,45 @@ public class DefaultBreweryLoader implements CommandLineRunner {
     private final BeerOrderRepository beerOrderRepository;
     private final CustomerRepository customerRepository;
 
+    private final UserRepository userRepository;
+
+    private final AuthorityRepository authorityRepository;
+
     @Override
     public void run(String... args) {
         loadBreweryData();
         loadCustomerData();
+        loadUserData();
+    }
+
+    private void loadUserData() {
+        Authority adminAuth = Authority.builder().role("ADMIN").build();
+        Authority userAuth = Authority.builder().role("USER").build();
+        Authority customerAuth = Authority.builder().role("CUSTOMER").build();
+
+        authorityRepository.save(adminAuth);
+        authorityRepository.save(userAuth);
+        authorityRepository.save(customerAuth);
+
+        User spring = User.builder()
+                .username("spring")
+                .password("{bcrypt}$2a$10$4hnwRUnZs1HdIPCz0FF9vOI9eMPNPbrhxESzVSrBKHWlyblNg8XZC")
+                .authority(adminAuth)
+                .build();
+        User user = User.builder()
+                .username("user")
+                .password("{sha256}eacda355d020fb6d58ef7db5dabee00c7b99955eddfe2ceef4cad923714700e9114798111d65597a")
+                .authority(userAuth)
+                .build();
+        User scott = User.builder()
+                .username("scott")
+                .password("{ldap}{SSHA}x/FxXFJsPiMmss8iFg5pSCDuyR++tNvgpKLxtw==")
+                .authority(customerAuth)
+                .build();
+
+        userRepository.save(spring);
+        userRepository.save(user);
+        userRepository.save(scott);
     }
 
     private void loadCustomerData() {

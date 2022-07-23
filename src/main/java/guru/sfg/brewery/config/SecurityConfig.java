@@ -1,8 +1,10 @@
 package guru.sfg.brewery.config;
 
+import guru.sfg.brewery.security.JpaUserDetailsService;
 import guru.sfg.brewery.security.RestHeaderAuthFilter;
 import guru.sfg.brewery.security.SfgPasswordEncoderFactories;
 import guru.sfg.brewery.security.RestUrlParamAuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -70,6 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests(authorize -> {
                     authorize
+                            .antMatchers("/h2-console/**").permitAll() // do not use in production
                             .antMatchers("/", "/webjars/**", "/login", "/resources/**").permitAll()
                             .antMatchers("/beers/find", "/beers*").permitAll()
                             .antMatchers(HttpMethod.GET, "/api/v1/beer/**").permitAll()
@@ -82,26 +85,42 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .formLogin()
                 .and()
                     .httpBasic();
+
+        // h2-console config
+        http.headers().frameOptions().sameOrigin();
     }
 
-// Fluent API way of overriding user configuration
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("spring")
-                .password("{bcrypt}$2a$10$4hnwRUnZs1HdIPCz0FF9vOI9eMPNPbrhxESzVSrBKHWlyblNg8XZC")
-                .roles("ADMIN")
-                .and()
-                .withUser("user")
-                .password("{sha256}eacda355d020fb6d58ef7db5dabee00c7b99955eddfe2ceef4cad923714700e9114798111d65597a")
-                .roles("USER")
-                .and()
-                .withUser("scott")
-                .password("{ldap}{SSHA}x/FxXFJsPiMmss8iFg5pSCDuyR++tNvgpKLxtw==")
-                .roles("CUSTOMER");
+    // @Autowired
+    // JpaUserDetailsService jpaUserDetailsService;
+
+    // Fluent API way of overriding user configuration
+    // @Override
+    // protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        // this can be commented out as well as the JpaUserDetailService, and the rest of configure method
+        // because we provide a password encoder and an implementation of user detail service
+        // spring will pick those up and autoconfigure exactly like on line 103
+        // auth.userDetailsService(this.jpaUserDetailsService).passwordEncoder(passwordEncoder());
 
 
-    }
+
+        // In memory configuration
+
+//        auth.inMemoryAuthentication()
+//                .withUser("spring")
+//                .password("{bcrypt}$2a$10$4hnwRUnZs1HdIPCz0FF9vOI9eMPNPbrhxESzVSrBKHWlyblNg8XZC")
+//                .roles("ADMIN")
+//                .and()
+//                .withUser("user")
+//                .password("{sha256}eacda355d020fb6d58ef7db5dabee00c7b99955eddfe2ceef4cad923714700e9114798111d65597a")
+//                .roles("USER")
+//                .and()
+//                .withUser("scott")
+//                .password("{ldap}{SSHA}x/FxXFJsPiMmss8iFg5pSCDuyR++tNvgpKLxtw==")
+//                .roles("CUSTOMER");
+
+
+   //  }
 
 //    @Override
 //    @Bean

@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@WebMvcTest // This annotation brings up the Spring context to get access to the web application context during testing
+// @WebMvcTest // This annotation brings up the Spring context to get access to the web application context during testing
 public abstract class BaseIT {
     @Autowired
     WebApplicationContext wac;
